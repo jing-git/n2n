@@ -1,0 +1,10 @@
+*.idea
+*.log
+*.iml
+*.classes
+*.o
+*.mk
+*.a
+*.c~
+*.gz
+
