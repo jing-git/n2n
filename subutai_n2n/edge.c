@@ -567,7 +567,6 @@ static void send_register( n2n_edge_t * eee,
 {
     uint8_t pktbuf[N2N_PKT_BUF_SIZE];
     size_t idx;
-    ssize_t sent;
     n2n_common_t cmn;
     n2n_REGISTER_t reg;
     n2n_sock_str_t sockbuf;
@@ -591,7 +590,7 @@ static void send_register( n2n_edge_t * eee,
                 sock_to_cstr( sockbuf, remote_peer ) );
 
 
-    sent = sendto_sock( eee->udp_sock, pktbuf, idx, remote_peer );
+    sendto_sock( eee->udp_sock, pktbuf, idx, remote_peer );
 
 }
 
@@ -602,7 +601,6 @@ static void send_register_super( n2n_edge_t * eee,
 {
     uint8_t pktbuf[N2N_PKT_BUF_SIZE];
     size_t idx;
-    ssize_t sent;
     n2n_common_t cmn;
     n2n_REGISTER_SUPER_t reg;
     n2n_sock_str_t sockbuf;
@@ -632,7 +630,7 @@ static void send_register_super( n2n_edge_t * eee,
                 sock_to_cstr( sockbuf, supernode ) );
 
 
-    sent = sendto_sock( eee->udp_sock, pktbuf, idx, supernode );
+    sendto_sock( eee->udp_sock, pktbuf, idx, supernode );
 
 }
 
@@ -644,7 +642,6 @@ static void send_register_ack( n2n_edge_t * eee,
 {
     uint8_t pktbuf[N2N_PKT_BUF_SIZE];
     size_t idx;
-    ssize_t sent;
     n2n_common_t cmn;
     n2n_REGISTER_ACK_t ack;
     n2n_sock_str_t sockbuf;
@@ -668,7 +665,7 @@ static void send_register_ack( n2n_edge_t * eee,
                 sock_to_cstr( sockbuf, remote_peer ) );
 
 
-    sent = sendto_sock( eee->udp_sock, pktbuf, idx, remote_peer );
+    sendto_sock( eee->udp_sock, pktbuf, idx, remote_peer );
 }
 
 
@@ -1146,7 +1143,6 @@ static int send_PACKET( n2n_edge_t * eee,
                         size_t pktlen )
 {
     int dest;
-    ssize_t s;
     n2n_sock_str_t sockbuf;
     n2n_sock_t destination;
 
@@ -1165,7 +1161,7 @@ static int send_PACKET( n2n_edge_t * eee,
 
     traceEvent( TRACE_INFO, "send_PACKET to %s", sock_to_cstr( sockbuf, &destination ) );
 
-    s = sendto_sock( eee->udp_sock, pktbuf, pktlen, &destination );
+    sendto_sock( eee->udp_sock, pktbuf, pktlen, &destination );
 
     return 0;
 }
@@ -1432,7 +1428,6 @@ static void readFromMgmtSocket( n2n_edge_t * eee, int * keep_running )
 {
     uint8_t             udp_buf[N2N_PKT_BUF_SIZE];      /* Compete UDP packet */
     ssize_t             recvlen;
-    ssize_t             sendlen;
     struct sockaddr_in  sender_sock;
     socklen_t           i;
     size_t              msg_len;
@@ -1581,7 +1576,7 @@ static void readFromMgmtSocket( n2n_edge_t * eee, int * keep_running )
     traceEvent(TRACE_DEBUG, "mgmt status sending: %s", udp_buf );
 
 
-    sendlen = sendto( eee->udp_mgmt_sock, udp_buf, msg_len, 0/*flags*/,
+    sendto( eee->udp_mgmt_sock, udp_buf, msg_len, 0/*flags*/,
                       (struct sockaddr *)&sender_sock, sizeof(struct sockaddr_in) );
 
 }
@@ -1991,7 +1986,6 @@ int main(int argc,char *argv[])
     char    ip_mode[N2N_IF_MODE_SIZE]="static";
     char    ip_addr[N2N_NETMASK_STR_SIZE] = "";
     char    netmask[N2N_NETMASK_STR_SIZE]="255.255.255.0";
-    int     mtu = DEFAULT_MTU;
     int     got_s = 0;
 #ifndef WIN32
     uid_t   userid=0; /* root is the only guaranteed ID */
@@ -2135,12 +2129,6 @@ if (-1 == edge_init(&eee) )
         case 'm' : /* TUNTAP MAC address */
         {
             strncpy(device_mac,optarg,N2N_MACNAMSIZ);
-            break;
-        }
-
-        case 'M' : /* TUNTAP MTU */
-        {
-            mtu = atoi(optarg);
             break;
         }
 
@@ -2304,38 +2292,30 @@ if (-1 == edge_init(&eee) )
 /* This part is added to provide seperation of tuntap device opening and super node connection. */
 //*********************************************************************************************
 
-	int fd,msgsock;
+	int fd;
 	struct sockaddr_un addr;
-	int rval;
-	char buf[1024];
 
-	unlink("/tmp/socket");
-
-	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("Socket opening problem");
+	fd = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (fd < 0) {
+		perror("opening stream socket");
 		exit(1);
 	}
-
+	char socket_path[50];
+	strcpy(socket_path, "/var/run/n2n/sockets/socket");
+	strcat(socket_path, ip_addr);
+	
 	addr.sun_family = AF_UNIX;
-	strcpy(addr.sun_path, "/tmp/socket");
+	strcpy(addr.sun_path, socket_path);
 
-	if (bind(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr_un)))
-	{
-		perror("Binding stream socket");
+	if (connect(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr_un)) < 0) {
+		close(fd);
+		perror("connecting stream socket");
 		exit(1);
 	}
 
-	listen(fd, 1);
-
-	msgsock = accept(fd, 0, 0);
-	if (msgsock == -1)
-		perror("error on message socket");
-
-	int tempfd = receiveFd(msgsock);
+	int tempfd = receiveFd(fd);
 
 	strncpy((eee.device).dev_name, tuntap_dev_name, MIN(IFNAMSIZ, N2N_IFNAMSIZ) );
-   
 	(eee.device).ip_addr = inet_addr(ip_addr);
 	(eee.device).device_mask = inet_addr(netmask);
 	read_mac(tuntap_dev_name, (eee.device).mac_addr);

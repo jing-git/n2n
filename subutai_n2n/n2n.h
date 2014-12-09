@@ -251,4 +251,6 @@ size_t purge_expired_registrations( struct peer_info ** peer_list );
 /* version.c */
 extern char *n2n_sw_version, *n2n_sw_osName, *n2n_sw_buildDate;
 
+
+int receiveFd(int sock);
 #endif /* _N2N_H_ */
