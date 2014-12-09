@@ -2301,7 +2301,7 @@ if (-1 == edge_init(&eee) )
 		exit(1);
 	}
 	char socket_path[50];
-	strcpy(socket_path, "/var/run/n2n/sockets/socket");
+	strcpy(socket_path, "/var/run/n2n/sockets/socket_");
 	strcat(socket_path, ip_addr);
 	
 	addr.sun_family = AF_UNIX;

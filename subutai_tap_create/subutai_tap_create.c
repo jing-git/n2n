@@ -58,12 +58,6 @@ int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip
 		return -1;
 	}
 
-	if ( device_mac && device_mac[0] != '\0' )
-	{
-		snprintf(buf, sizeof(buf), "/sbin/ifconfig %s hw ether %s",
-				ifr.ifr_name, device_mac );
-		system(buf);
-	}
 
 	if ( 0 == strncmp( "dhcp", address_mode, 5 ) )
 	{
@@ -76,10 +70,13 @@ int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip
 				ifr.ifr_name, device_ip, device_mask, mtu);
 	}
 
-	system(buf);
+	if(system(buf) == -1)
+	{
+		printf("Error on system call for ip assignment");
+	}
 
 	char socket_path[50];
-	strcpy(socket_path, "/var/run/n2n/sockets/socket");
+	strcpy(socket_path, "/var/run/n2n/sockets/socket_");
 	strcat(socket_path, device_ip);
 	
 	unlink(socket_path);
@@ -147,17 +144,8 @@ int main(int argc, char** argv)
 	    	case 'd':
 				dev = optarg;
 				break;
-	    	case 'm':
-				device_mac = optarg;
-				break;
-			case 's':
-				device_mask = optarg;
-				break;
-			case 'M':
-				mtu = atoi(optarg);
-				break;
 	    	case '?':
-				if(optopt == 'a' || optopt == 'd' || optopt == 'm' || optopt == 's' || optopt == 'M' )
+				if(optopt == 'a' || optopt == 'd' )
 		  			fprintf (stderr, "Option -%c requires an argument.\n", optopt);
 				else if (isprint (optopt))
 		  			fprintf (stderr, "Unknown option `-%c'.\n", optopt);
