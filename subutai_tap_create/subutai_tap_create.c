@@ -18,6 +18,8 @@
 #include "ancillary.h"
 #include <sys/un.h>
 #include <sys/socket.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #define NAME "/tmp/socket"
 
@@ -29,7 +31,7 @@ int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip
 	printf("Tuntap opening is starting with these parameters: %s %s %s %s %s %d\n",
 				dev, device_mac, address_mode, device_ip, device_mask, mtu);
 	struct ifreq ifr;
-	int fd, fd_sock;
+	int fd, fd_sock, msgsock;
 	char *tuntap_device = "/dev/net/tun";
 	struct sockaddr_un addr;
 
@@ -56,12 +58,6 @@ int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip
 		return -1;
 	}
 
-	if ( device_mac && device_mac[0] != '\0' )
-	{
-		snprintf(buf, sizeof(buf), "/sbin/ifconfig %s hw ether %s",
-				ifr.ifr_name, device_mac );
-		system(buf);
-	}
 
 	if ( 0 == strncmp( "dhcp", address_mode, 5 ) )
 	{
@@ -74,35 +70,55 @@ int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip
 				ifr.ifr_name, device_ip, device_mask, mtu);
 	}
 
-	system(buf);
+	if(system(buf) == -1)
+	{
+		printf("Error on system call for ip assignment");
+	}
 
+	char socket_path[50];
+	strcpy(socket_path, "/var/run/n2n/sockets/socket_");
+	strcat(socket_path, device_ip);
+	
+	unlink(socket_path);
 
-
-	fd_sock = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (fd_sock < 0) {
-		perror("opening stream socket");
+	if ((fd_sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+	{
+		perror("Socket opening problem");
 		exit(1);
 	}
 
 	addr.sun_family = AF_UNIX;
-	strcpy(addr.sun_path, NAME);
+	strcpy(addr.sun_path, socket_path);
 
-	if (connect(fd_sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_un)) < 0) {
-		close(fd_sock);
-		perror("connecting stream socket");
+	if (bind(fd_sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_un)))
+	{
+		perror("Binding stream socket");
 		exit(1);
 	}
 
+	listen(fd_sock, 1);
 
-	int k = ancil_send_fd(fd_sock,fd);
-	if(k == 0)
+	while(1)
 	{
-		printf("Ancillary send is successful.\n");
+		msgsock = accept(fd_sock, 0, 0);
+		if (msgsock == -1)
+			perror("error on message socket");
+
+
+		int k = ancil_send_fd(msgsock,fd);
+		if(k == 0)
+		{
+			printf("Ancillary send is successful.\n");
+		}
+		else
+		{
+			printf("Ancillary send is NOT successful!!\n");
+		}
+
+
+
 	}
-	else
-	{
-		printf("Ancillary send is NOT successful!!\n");
-	}
+
 
 	return(fd);
 }
@@ -112,11 +128,11 @@ int main(int argc, char** argv)
 {
 
 	char *dev = "edge0"; 
-	char *device_mac = "5a:96:79:71:dc:91";
+	char *device_mac = ""; //"5a:96:79:71:dc:91";
 	char *address_mode = "dhcp";
 	char *device_ip = "10.11.12.13";
 	char* device_mask = "255.255.255.0";
-	int mtu = 1500;
+	int mtu = 1400;
 	int c;
 	while ((c = getopt (argc, argv, "d:m:a:s:M:")) != -1)
 		switch (c)
@@ -128,17 +144,8 @@ int main(int argc, char** argv)
 	    	case 'd':
 				dev = optarg;
 				break;
-	    	case 'm':
-				device_mac = optarg;
-				break;
-			case 's':
-				device_mask = optarg;
-				break;
-			case 'M':
-				mtu = atoi(optarg);
-				break;
 	    	case '?':
-				if(optopt == 'a' || optopt == 'd' || optopt == 'm' || optopt == 's' || optopt == 'M' )
+				if(optopt == 'a' || optopt == 'd' )
 		  			fprintf (stderr, "Option -%c requires an argument.\n", optopt);
 				else if (isprint (optopt))
 		  			fprintf (stderr, "Unknown option `-%c'.\n", optopt);
