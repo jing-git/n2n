@@ -21,8 +21,15 @@
  * Wilfried "Wonka" Klaebe
  * Lukasz Taczuk
  *
+ * Edited by Ozlem Ceren Sahin
+ *           Emin Inal
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include "n2n.h"
 #include "ancillary.h"
 #include "n2n_transforms.h"
@@ -31,6 +38,7 @@
 #include <sys/un.h>
 #include <sys/socket.h>
 #include "minilzo.h"
+
 
 #if defined(DEBUG)
 #define SOCKET_TIMEOUT_INTERVAL_SECS    5
@@ -1928,11 +1936,6 @@ static int run_loop(n2n_edge_t * eee );
 #define N2N_MACNAMSIZ           18 /* AA:BB:CC:DD:EE:FF + NULL*/
 #define N2N_IF_MODE_SIZE        16 /* static | dhcp */
 
-
-
-
-
-
 static void read_mac(char *ifname, n2n_mac_t mac_addr) {
   int _sock, res;
   struct ifreq ifr;
@@ -1957,16 +1960,31 @@ static void read_mac(char *ifname, n2n_mac_t mac_addr) {
 
 
 
+int receiveFd(int sock)
+{
+	int fd;
+	int result;
 
+        result = ancil_recv_fd(sock, &fd);
 
-
-
-
+	if(result)
+	{
+		traceEvent(TRACE_ERROR,"Error on ancillary receive!! Rresult:%d..", result);
+		exit(1);
+	} else
+	{
+		traceEvent(TRACE_NORMAL,"Ancillary receive is successful result:%d, fd:%d\n", 
+			   result, 
+			   fd);
+	}
+	return fd;
+}
 
 /** Entry point to program from kernel. */
-int main(int argc, char* argv[])
+int main(int argc,char *argv[])
 {
-    int     opt, fd_sock, recv_fd;
+
+    int     opt;
     int     local_port = 0 /* any port */;
     int     mgmt_port = N2N_EDGE_MGMT_PORT; /* 5644 by default */
     char    tuntap_dev_name[N2N_IFNAMSIZ] = "edge0";
@@ -1975,7 +1993,6 @@ int main(int argc, char* argv[])
     char    netmask[N2N_NETMASK_STR_SIZE]="255.255.255.0";
     int     mtu = DEFAULT_MTU;
     int     got_s = 0;
-	struct 	sockaddr_un addr_sock_fd;
 #ifndef WIN32
     uid_t   userid=0; /* root is the only guaranteed ID */
     gid_t   groupid=0; /* root is the only guaranteed ID */
@@ -1990,7 +2007,7 @@ int main(int argc, char* argv[])
 
     n2n_edge_t eee; /* single instance for this program */
 
-    if (-1 == edge_init(&eee) )
+if (-1 == edge_init(&eee) )
     {
         traceEvent( TRACE_ERROR, "Failed in edge_init" );
         exit(1);
@@ -2213,7 +2230,6 @@ int main(int argc, char* argv[])
         } /* end switch */
     }
 
-
 #ifdef N2N_HAVE_DAEMON
     if ( eee.daemon )
     {
@@ -2282,60 +2298,50 @@ int main(int argc, char* argv[])
         traceEvent(TRACE_NORMAL, "ip_mode='%s'", ip_mode);        
     }
 
-/********************************************************************************************************************/
 
-	/* Create socket from which to read. */ 
-	fd_sock = socket(AF_UNIX, SOCK_DGRAM, 0); 
-	if (fd_sock < 0) 
-	{ 
-		perror("opening datagram socket"); 
-		exit(1); 
-	}
 
-	/* Create name. */ 
-	addr_sock_fd.sun_family = AF_UNIX; 
-	strcpy(addr_sock_fd.sun_path, "socket4");
 
-	/* Bind the UNIX domain address to the created socket */ 
-	if (bind(fd_sock, (struct sockaddr *) &addr_sock_fd, sizeof(struct sockaddr_un))) 
-	{ 
-		perror("binding name to datagram socket"); 
-		exit(1); 
-	} 
-	/*
+/* This part is added to provide seperation of tuntap device opening and super node connection. */
+//*********************************************************************************************
+
+	int fd,msgsock;
+	struct sockaddr_un addr;
+	int rval;
 	char buf[1024];
-	if (read(fd_sock, buf, 1024) < 0) 
-		perror("receiving datagram packet"); 
-		
-	traceEvent(TRACE_NORMAL, "buf fd is =%s", buf); 
-	close(fd_sock); 
-	unlink("socket2"); */
-	
-	
-	if(!ancil_recv_fd(fd_sock, &recv_fd))
+
+	unlink("/tmp/socket");
+
+	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-		traceEvent(TRACE_NORMAL, "OK fd is = %d", recv_fd);   
+		perror("Socket opening problem");
+		exit(1);
 	}
-	else
+
+	addr.sun_family = AF_UNIX;
+	strcpy(addr.sun_path, "/tmp/socket");
+
+	if (bind(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr_un)))
 	{
-		traceEvent(TRACE_NORMAL, "ERROR fd is =%d", recv_fd);   
+		perror("Binding stream socket");
+		exit(1);
 	}
-	
+
+	listen(fd, 1);
+
+	msgsock = accept(fd, 0, 0);
+	if (msgsock == -1)
+		perror("error on message socket");
+
+	int tempfd = receiveFd(msgsock);
+
 	strncpy((eee.device).dev_name, tuntap_dev_name, MIN(IFNAMSIZ, N2N_IFNAMSIZ) );
    
-    (eee.device).ip_addr = inet_addr(ip_addr);
+	(eee.device).ip_addr = inet_addr(ip_addr);
 	(eee.device).device_mask = inet_addr(netmask);
 	read_mac(tuntap_dev_name, (eee.device).mac_addr);
-	(eee.device).fd = recv_fd;
+	(eee.device).fd = tempfd;
 
-/*
-
-
-    if(tuntap_open(&(eee.device), tuntap_dev_name, ip_mode, ip_addr, netmask, device_mac, mtu) < 0)
-        return(-1);
-        * */
-        
-        
+//************************************************************************************************************
 
 #ifndef WIN32
     if ( (userid != 0) || (groupid != 0 ) ) {
@@ -2387,6 +2393,7 @@ int main(int argc, char* argv[])
     update_supernode_reg(&eee, time(NULL) );
 
     return run_loop(&eee);
+
 }
 
 static int run_loop(n2n_edge_t * eee )
@@ -2498,5 +2505,4 @@ static int run_loop(n2n_edge_t * eee )
 
     return(0);
 }
-
 
