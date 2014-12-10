@@ -33,6 +33,8 @@ MKDIR=mkdir -p
 INSTALL_PROG=$(INSTALL) -m755
 INSTALL_DOC=$(INSTALL) -m644
 
+N2NPATH="/var/run/n2n/"
+SOCKETSPATH="/var/run/n2n/sockets/"
 
 # DESTDIR set in debian make system
 PREFIX?=$(DESTDIR)/usr
@@ -97,9 +99,11 @@ version.o: Makefile
 clean:
 	rm -rf $(N2N_OBJS) $(N2N_LIB) $(APPS) $(DOCS) test *.dSYM *~
 
-install: edge supernode edge.8.gz supernode.1.gz n2n_v2.7.gz
+install: edge supernode tap_create edge.8.gz supernode.1.gz n2n_v2.7.gz
 	echo "MANDIR=$(MANDIR)"
 	$(MKDIR) $(SBINDIR) $(MAN1DIR) $(MAN7DIR) $(MAN8DIR)
+	$(MKDIR) $(N2NPATH)
+	$(MKDIR) $(SOCKETSPATH)
 	$(INSTALL_PROG) supernode $(SBINDIR)/
 	$(INSTALL_PROG) edge $(SBINDIR)/
 	$(INSTALL_PROG) tap_create $(SBINDIR)/

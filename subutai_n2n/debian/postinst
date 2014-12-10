@@ -1,0 +1,5 @@
+mkdir /var/run/n2n
+chmod 755 /var/run/n2n
+
+mkdir /var/run/n2n/sockets
+chmod 755 /var/run/n2n/sockets
