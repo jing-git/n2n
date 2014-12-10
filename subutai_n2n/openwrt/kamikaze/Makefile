@@ -10,7 +10,7 @@ PKG_BRANCH:=trunk
 PKG_SOURCE_URL:=https://svn.ntop.org/svn/ntop/trunk/n2n
 PKG_REV:=$(shell LC_ALL=C svn info ${PKG_SOURCE_URL} | sed -ne's/^Last Changed Rev: //p')
 
-PKG_NAME:=n2n
+PKG_NAME:=subutai-n2n
 PKG_VERSION:=svn$(PKG_REV)
 PKG_RELEASE:=1
 
@@ -28,7 +28,7 @@ PKG_INSTALL_DIR:=$(PKG_BUILD_DIR)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/n2n
+define Package/subutai-n2n
   SECTION:=net
   CATEGORY:=Network
   TITLE:=VPN tunneling daemon
@@ -46,7 +46,7 @@ define Build/Compile
 endef
 
 
-define Package/n2n/install
+define Package/subutai-n2n/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/edge $(1)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/supernode $(1)/usr/sbin/

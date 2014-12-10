@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 
 Package: subutai-n2n
 Architecture: any
-Depends: n2n-edge, n2n-supernode
+Depends: subutai-n2n-edge, subutai-n2n-supernode
 Description: dummy package for transition purposes
  A dummy package for transition purposes that depends on n2n-edge,
  n2n-supernode and tuntap-create
@@ -33,7 +33,7 @@ Description: a layer-two peer-to-peer virtual private network (VPN)
 
 Package: subutai-n2n-supernode
 Architecture: any
-Suggests: n2n-edge
+Suggests: subutai-n2n-edge
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: n2n (<< 2.1.0-1)
 Replaces: n2n (<< 2.1.0-1)
@@ -50,7 +50,7 @@ Description: a layer-two peer-to-peer virtual private network (VPN)
  Supernode is a node introduction registry, broadcast conduit and packet relay
  node for the n2n system.
 
-Package: subutai-tap-creator
+Package: subutai-tap-create
 Architecture: any
 Depends: libancillary
 Description: tap device creator
