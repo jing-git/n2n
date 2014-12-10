@@ -1,15 +1,15 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          n2n-supernode
+# Provides:          tap-create
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: n2n-supernode
-# Description:       Start n2n supernode
+# Short-Description: tap-create
+# Description:       Start tap create
 ### END INIT INFO
 
-# Init script for n2n supernode
+# Init script for tap create
 # Copyright (C) 2010  Kim Hansen <kim@i9.dk>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,9 +29,9 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="n2n supernode"
-NAME=n2n-supernode
-DAEMON=/usr/sbin/supernode
+DESC="tap create"
+NAME=subutai-tap-create
+DAEMON=/usr/sbin/tap_create
 DAEMON_ARGS=""
 SCRIPTNAME=/etc/init.d/$NAME
 

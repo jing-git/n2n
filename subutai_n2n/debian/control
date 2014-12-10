@@ -1,18 +1,18 @@
-Source: n2n
+Source: subutai-n2n
 Section: net
 Priority: extra
-Maintainer: Jean-Baptiste Denis <jeanbaptiste.denis@gmail.com>
+Maintainer: Subutai Team <subut.ai>
 Build-Depends: cdbs, debhelper (>= 5), libc6-dev (>= 2.0), dpatch, gcc, libssl-dev
 Standards-Version: 3.7.2
 
-Package: n2n
+Package: subutai-n2n
 Architecture: any
-Depends: n2n-edge, n2n-supernode
+Depends: subutai-n2n-edge, subutai-n2n-supernode
 Description: dummy package for transition purposes
- A dummy package for transition purposes that depends on n2n-edge and
- n2n-supernode
+ A dummy package for transition purposes that depends on n2n-edge,
+ n2n-supernode and tuntap-create
 
-Package: n2n-edge
+Package: subutai-n2n-edge
 Architecture: any
 Suggests: uml-utilities
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -31,9 +31,9 @@ Description: a layer-two peer-to-peer virtual private network (VPN)
  Edge is the edge node daemon for n2n which creates a TAP interface to expose
  the n2n virtual LAN.
 
-Package: n2n-supernode
+Package: subutai-n2n-supernode
 Architecture: any
-Suggests: n2n-edge
+Suggests: subutai-n2n-edge
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: n2n (<< 2.1.0-1)
 Replaces: n2n (<< 2.1.0-1)
@@ -49,3 +49,10 @@ Description: a layer-two peer-to-peer virtual private network (VPN)
  .
  Supernode is a node introduction registry, broadcast conduit and packet relay
  node for the n2n system.
+
+Package: subutai-tap-create
+Architecture: any
+Description: tap device creator
+ TAP (namely network tap) devices simulates a link layer device and it
+ operates with layer 2 packets like Ethernet frames. By this package tap
+ creation and edge commands are seperated.

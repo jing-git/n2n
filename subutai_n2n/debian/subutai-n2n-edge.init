@@ -29,8 +29,8 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="n2n edge"
-NAME=n2n-edge
+DESC="subutai n2n edge"
+NAME=subutai-n2n-edge
 DAEMON=/usr/sbin/edge
 SCRIPTNAME=/etc/init.d/$NAME
 
