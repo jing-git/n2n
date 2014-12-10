@@ -1,2 +1,2 @@
-rm-rf /var/run/n2n/sockets
+rm -rf /var/run/n2n/sockets
 rm -rf /var/run/n2n

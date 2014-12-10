@@ -22,7 +22,7 @@ function exit_fail()
 }
 
 PACKAGE="subutai-n2n"
-PKG_VERSION="1.0.0"
+PKG_VERSION="2.1.1"
 PKG_AND_VERSION="${PACKAGE}-${PKG_VERSION}"
 
 TEMPDIR="tmp"

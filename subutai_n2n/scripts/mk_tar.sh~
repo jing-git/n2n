@@ -63,6 +63,8 @@ debian/changelog
 debian/compat
 debian/control
 debian/copyright
+debian/postinst
+debian/postrm
 debian/subutai-n2n-edge.docs
 debian/subutai-n2n-edge.install
 debian/subutai-n2n-supernode.install
