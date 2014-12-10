@@ -5,6 +5,9 @@ set -e
 echo "Check version"
 checkVersion "n2n" $type
 
+echo "removing previous debians from jenkins"
+rm /var/lib/jenkins/Automation/Automation_ISO/work/custom-iso/pool/extras/subutai-n2n*.deb
+
 echo "Version is changed. Build new debian"
 /bin/bash ./scripts/mk_deb.sh
 
