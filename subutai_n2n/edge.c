@@ -1964,11 +1964,11 @@ int receiveFd(int sock)
 
 	if(result)
 	{
-		traceEvent(TRACE_ERROR,"Error on subutai-n2n-edge fd receival!! Rresult:%d..", result);
+		traceEvent(TRACE_ERROR,"Error on ancillary receive!! Rresult:%d..", result);
 		exit(1);
 	} else
 	{
-		traceEvent(TRACE_NORMAL,"Subutai-n2n-edge fd receival is successful result:%d, fd:%d\n", 
+		traceEvent(TRACE_NORMAL,"Ancillary receive is successful result:%d, fd:%d\n", 
 			   result, 
 			   fd);
 	}

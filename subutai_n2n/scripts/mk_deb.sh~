@@ -37,6 +37,7 @@ pushd ${TEMPDIR}
 
 tar xzf ${TARFILE} #At original location
 
+exit 0
 cd subutai-n2n*
 
 dpkg-buildpackage -rfakeroot

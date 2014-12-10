@@ -1,15 +1,15 @@
-#! /bin/bash
+#! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          n2n-edge
+# Provides:          n2n-supernode
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: n2n-edge
-# Description:       Start n2n edge node daemon
+# Short-Description: n2n-supernode
+# Description:       Start n2n supernode
 ### END INIT INFO
 
-# Init script for n2n edge node
+# Init script for n2n supernode
 # Copyright (C) 2010  Kim Hansen <kim@i9.dk>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,9 +29,10 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="n2n edge"
-NAME=n2n-edge
-DAEMON=/usr/sbin/edge
+DESC="n2n supernode"
+NAME=n2n-supernode
+DAEMON=/usr/sbin/supernode
+DAEMON_ARGS=""
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
@@ -39,13 +40,6 @@ SCRIPTNAME=/etc/init.d/$NAME
 
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
-
-# Check config
-if [ -z "$N2N_EDGE_CONFIG_DONE" ]
-then
-	echo "Warning: n2n-edge not configured, edit config file in /etc/default/$NAME." 1>&2
-        exit 0
-fi
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
@@ -65,9 +59,7 @@ do_start()
 	#   2 if daemon could not be started
 	start-stop-daemon --start --quiet --user nobody --exec $DAEMON --test \
 		|| return 1
-	export N2N_KEY
-	start-stop-daemon --start --quiet --user nobody --exec $DAEMON -- \
-		-a $N2N_IP -c $N2N_COMMUNITY -l $N2N_SUPERNODE:7654 -u $(id -u nobody) -g $(id -g nobody) \
+	start-stop-daemon --start --quiet --user nobody --chuid nobody --exec $DAEMON -- \
 		$DAEMON_ARGS \
 		|| return 2
 }

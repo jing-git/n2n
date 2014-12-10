@@ -8,8 +8,8 @@ community.
 
 0. become root
 
-1. create tun device
-# tunctl -t tun0
+1. create tap device
+# ./tap_create -d n2n0 -a 1.2.3.4 & 
 
 3. enable the edge process
 # ./edge -d n2n0 -c mynetwork -k encryptme -u 99 -g 99 -m 3C:A0:12:34:56:78 -a 1.2.3.4 -l a.b.c.d:xyw

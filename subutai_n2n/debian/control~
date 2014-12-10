@@ -50,7 +50,7 @@ Description: a layer-two peer-to-peer virtual private network (VPN)
  Supernode is a node introduction registry, broadcast conduit and packet relay
  node for the n2n system.
 
-Package: subutai-tap-create
+Package: subutai-tap-creator
 Architecture: any
 Depends: libancillary
 Description: tap device creator
