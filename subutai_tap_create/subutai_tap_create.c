@@ -21,10 +21,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define NAME "/tmp/socket"
-
-#define DATA "The sea is calm tonight, the tide is full . . ."
-
 int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip, char* device_mask, int mtu)
 {
 
@@ -108,11 +104,11 @@ int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip
 		int k = ancil_send_fd(msgsock,fd);
 		if(k == 0)
 		{
-			printf("Ancillary send is successful.\n");
+			printf("Subutai-n2n-edge fd send is successful.\n");
 		}
 		else
 		{
-			printf("Ancillary send is NOT successful!!\n");
+			printf("Subutai-n2n-edge fd send is NOT successful!!\n");
 		}
 
 
@@ -128,7 +124,7 @@ int main(int argc, char** argv)
 {
 
 	char *dev = "edge0"; 
-	char *device_mac = ""; //"5a:96:79:71:dc:91";
+	char *device_mac = ""; 
 	char *address_mode = "dhcp";
 	char *device_ip = "10.11.12.13";
 	char* device_mask = "255.255.255.0";
