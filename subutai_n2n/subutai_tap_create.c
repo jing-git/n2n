@@ -34,15 +34,47 @@
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <signal.h>
+
+
+int fd_sock;
+struct sockaddr_un addr;
+	
+/**
+*
+* End function, it called when pressing ctrl + c or sudo kill
+* It deletes socket files created before, closes the opened socket
+* and exits properly.
+*
+*/
+void endProcess()
+{
+	unlink(addr.sun_path);
+	close(fd_sock);
+	exit(0);
+}
+
+/**
+*
+* Signal Handler function, it catches SIGINT occured by ctrl + c and
+* it catches SIGTERM occured by sudo kill
+*
+*/
+void signalHandler(int signal)
+{
+	if(signal == SIGINT || signal == SIGTERM)
+	{
+		endProcess();
+	}
+}
 
 int tuntap_open(char *dev, char *device_mac, char *address_mode, char *device_ip, char* device_mask, int mtu)
 {
 	printf("Tuntap opening is starting with these parameters: %s %s %s %s %s %d\n",
 				dev, device_mac, address_mode, device_ip, device_mask, mtu);
 	struct ifreq ifr;
-	int fd, fd_sock, msgsock;
+	int fd, msgsock;
 	char *tuntap_device = "/dev/net/tun";
-	struct sockaddr_un addr;
 
 #define N2N_LINUX_SYSTEMCMD_SIZE 128
 
@@ -166,6 +198,9 @@ int main(int argc, char** argv)
 				abort ();
 		}
 	
+	signal(SIGINT, signalHandler); /* for ctrl + c */
+	signal(SIGTERM, signalHandler); /* for sudo kill */
+
 	tuntap_open(dev, device_mac, address_mode, device_ip, device_mask, mtu);
 	while(1) {}
 }
