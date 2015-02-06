@@ -1,1 +1,2 @@
 tap_create /usr/sbin
+tap_create_readme.md /var/run/n2n/sockets
