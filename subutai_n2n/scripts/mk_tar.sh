@@ -28,6 +28,7 @@ PKG_AND_VERSION="${PACKAGE}-${PKG_VERSION}"
 TEMPDIR="tmp"
 
 SOURCE_MANIFEST="
+tap_create_readme.md
 README
 edge.c
 lzoconf.h

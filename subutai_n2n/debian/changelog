@@ -1,10 +1,11 @@
-subutai-n2n (2.1.1-1) unstable; urgency=low
-
+subutai-n2n (2.1.1-2) unstable; urgency=low
+  
+  * fixed a bug about missing socket folder in management host.
   * n2n_v2 is the backcone of this project.
   * Edge command is splitted into two commands.
   * Tap-create command opens a tap device.
   * Edge command connects edge to previously opened tap device.
   * Tuntap open step is removed from edge.
 
- -- Subutai Team <subut.ai>  Wed, 10 Dec 2014 14:14:40 +0200
+ -- Subutai Team <subut.ai>  Fri, 06 Feb 2015 11:00:40 +0200
  
